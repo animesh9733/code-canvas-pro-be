@@ -1,0 +1,34 @@
+
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Snippet {
+  id        String   @id @default(uuid())
+  title     String
+  code      String
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  content   String
+  rating    Int
+  type      String   @default("general")
+  createdAt DateTime @default(now())
+}
+
+model Suggestion {
+  id        String   @id @default(uuid())
+  title     String
+  description String
+  status    String   @default("not reviewed")
+  createdAt DateTime @default(now())
+}
