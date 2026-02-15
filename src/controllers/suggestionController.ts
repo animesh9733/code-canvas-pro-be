@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../config/prisma";
+import Suggestion from "../models/Suggestion";
 
 export const saveSuggestion = async (req: Request, res: Response) => {
     try {
@@ -9,11 +9,9 @@ export const saveSuggestion = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "Title and description are required" });
         }
 
-        const suggestion = await prisma.suggestion.create({
-            data: {
-                title,
-                description,
-            },
+        const suggestion = await Suggestion.create({
+            title,
+            description,
         });
 
         res.status(201).json(suggestion);
@@ -25,9 +23,7 @@ export const saveSuggestion = async (req: Request, res: Response) => {
 
 export const getAllSuggestions = async (req: Request, res: Response) => {
     try {
-        const suggestions = await prisma.suggestion.findMany({
-            orderBy: { createdAt: "desc" },
-        });
+        const suggestions = await Suggestion.find().sort({ createdAt: -1 });
         res.json(suggestions);
     } catch (error) {
         console.error("Error fetching suggestions:", error);
@@ -48,10 +44,15 @@ export const updateSuggestionStatus = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "Status is required" });
         }
 
-        const suggestion = await prisma.suggestion.update({
-            where: { id },
-            data: { status },
-        });
+        const suggestion = await Suggestion.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        if (!suggestion) {
+            return res.status(404).json({ error: "Suggestion not found" });
+        }
 
         res.json(suggestion);
     } catch (error) {

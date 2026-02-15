@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../config/prisma";
+import Snippet from "../models/Snippet";
 
 export const saveSnippet = async (req: Request, res: Response) => {
     try {
@@ -9,14 +9,12 @@ export const saveSnippet = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "Code is required" });
         }
 
-        const snippet = await prisma.snippet.create({
-            data: {
-                code,
-                title: title || "Untitled Snippet",
-            },
+        const snippet = await Snippet.create({
+            code,
+            title: title || "Untitled Snippet",
         });
 
-        res.status(201).json({ id: snippet.id });
+        res.status(201).json({ id: snippet._id });
     } catch (error) {
         console.error("Error saving snippet:", error);
         res.status(500).json({ error: "Failed to save snippet" });
@@ -27,13 +25,12 @@ export const getSnippet = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        if (typeof id !== "string") {
-            return res.status(400).json({ error: "Invalid ID" });
+        if (!id || id.length !== 24) { // Basic MongoDB ObjectId length check
+            // It might be a UUID if legacy data is there, but for now we assume ObjectId
+            // Or we just catch the error from findById
         }
 
-        const snippet = await prisma.snippet.findUnique({
-            where: { id },
-        });
+        const snippet = await Snippet.findById(id);
 
         if (!snippet) {
             return res.status(404).json({ error: "Snippet not found" });

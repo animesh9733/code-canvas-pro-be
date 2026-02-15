@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../config/prisma";
+import Feedback from "../models/Feedback";
 
 export const saveFeedback = async (req: Request, res: Response) => {
     try {
@@ -9,12 +9,10 @@ export const saveFeedback = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "Content and rating are required" });
         }
 
-        const feedback = await prisma.feedback.create({
-            data: {
-                content,
-                rating: Number(rating),
-                type: type || "general",
-            },
+        const feedback = await Feedback.create({
+            content,
+            rating: Number(rating),
+            type: type || "general",
         });
 
         res.status(201).json(feedback);
@@ -26,9 +24,7 @@ export const saveFeedback = async (req: Request, res: Response) => {
 
 export const getAllFeedback = async (req: Request, res: Response) => {
     try {
-        const feedback = await prisma.feedback.findMany({
-            orderBy: { createdAt: "desc" },
-        });
+        const feedback = await Feedback.find().sort({ createdAt: -1 });
         res.json(feedback);
     } catch (error) {
         console.error("Error fetching feedback:", error);

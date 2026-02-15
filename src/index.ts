@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { prisma } from "./config/prisma";
+import { connectDB } from "./config/db";
 import snippetRoutes from "./routes/snippetRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import suggestionRoutes from "./routes/suggestionRoutes";
@@ -9,7 +9,6 @@ import suggestionRoutes from "./routes/suggestionRoutes";
 dotenv.config();
 
 const PORT = process.env.PORT || 5100;
-
 const app = express();
 
 app.use(cors());
@@ -24,12 +23,10 @@ app.get("/health", (_, res: Response) => {
   res.json({ status: "ok" });
 });
 
-
-
 async function startServer() {
   try {
     // Check DB connection
-    await prisma.$connect();
+    await connectDB();
     console.log("✅ Database connected successfully");
 
     app.listen(PORT, () => {
